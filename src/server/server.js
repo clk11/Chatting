@@ -60,7 +60,7 @@ app.post('/login', async (req, res) => {
         } else checkAll = false;
     }
     if (checkAll) {
-        // await db.query(`insert into t_user (username,room,ip)values($1,$2,$3);`, [username, room, ipAddress]);
+        // await db.query(`insert into t_user (username,ip)values($1,$2,$3);`, [username, ipAddress]);
     }
     else return res.status(500).send({ err: 'A user with this username was already connected ! Wait until the room is destroyed and try again !\n !!! A room is destroyed when every user logged off the room . ' });
     const user = {

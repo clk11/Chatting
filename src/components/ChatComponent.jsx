@@ -6,7 +6,7 @@ import ProgressBar from './ProgressBar'
 import ChatUsers from './ChatUsers';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
-
+import UserMenu from './UserMenu';
 //Commited 
 const ChatComponent = ({ logout, user, socket }) => {
     //Modal
@@ -70,16 +70,13 @@ const ChatComponent = ({ logout, user, socket }) => {
                     <ChatUsers open={open} setOpen={setOpen} users={users} />
                     <Box p={2}>
                         <Grid container spacing={4}>
-                            <Grid item xs={4}>
+                            <Grid item xs={10}>
                                 <Typography variant='h6' gutterBottom>
                                     {'Room : ' + user.room}
                                 </Typography>
                             </Grid>
-                            <Grid item xs={4}>
-                                <Button onClick={logout} variant="contained" >Log off</Button>
-                            </Grid>
-                            <Grid item xs={4}>
-                                <Button onClick={getUsers} variant="contained" >Users</Button>
+                            <Grid item xs={2}>
+                                <UserMenu onLogout={logout} onGetUsers={getUsers} />
                             </Grid>
                         </Grid>
                         <Grid container justifyContent={'center'}>
@@ -88,6 +85,7 @@ const ChatComponent = ({ logout, user, socket }) => {
                             </Grid>
                             <Grid item sx={{ paddingTop: '40px' }}>
                                 <TextField
+                                    onKeyPress={(e) => { if (e.key == 'Enter') onSend() }}
                                     hiddenLabel
                                     id="message"
                                     variant="filled"
