@@ -4,7 +4,7 @@ const cors = require('cors');
 const http = require("http");
 const jwt = require('jsonwebtoken');
 const config = require('config');
-// const db = require('./db');
+const db = require('./db');
 const auth = require('./middlewares/auth');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
@@ -47,35 +47,47 @@ io.on("connection", (socket) => {
     });
 })
 
-app.post('/login', async (req, res) => {
+app.post('/register', async (req, res) => {
     const ipAddress = req.socket.remoteAddress;
-    const { username, room } = req.body;
-    let checkAll = true;
-    let checkRoom = context.users.get(room);
-    if (checkRoom == undefined) {
-        context.users.set(room, new Map().set(username, 1));
-    } else {
-        if (checkRoom.get(username) == undefined) {
-            context.users.get(room).set(username, 1);
-        } else checkAll = false;
-    }
-    if (checkAll) {
-        // await db.query(`insert into t_user (username,ip)values($1,$2,$3);`, [username, ipAddress]);
-    }
-    else return res.status(500).send({ err: 'A user with this username was already connected ! Wait until the room is destroyed and try again !\n !!! A room is destroyed when every user logged off the room . ' });
-    const user = {
-        username,
-        room
-    }
-    let payload = {
-        user
-    };
-    const token = jwt.sign(payload, config.get('jwtSecret'), {
-        expiresIn: '2h',
-    });
-    return res.json({ token });
-});
+    const { username, password, rpassword } = req.body;
+    if (username.length > 3 && password.length > 6 && rpassword === password) {
+        const result = (await db.query(`select * from t_user where username = $1`, [username])).rows[0];
+        if (result === undefined)
+            await db.query(`insert into t_user (username,password,ip)values($1,$2,$3);`, [username, password, ipAddress]);
+        else return res.status(500).send({ err: 'There is already a user with this username .' });
+    } else return res.status(500).send({ err: 'Something went wrong ! Check your credentials .' });
+    return res.json({ username });
+})
 
+app.post('/login', async (req, res) => {
+    const { username, password, room } = req.body;
+    if (username.length > 3 && password.length > 6) {
+        const result = (await db.query(`select * from t_user where username = $1`, [username])).rows[0];
+        if (result !== undefined) {
+            if (password === result.password) {
+                let checkRoom = context.users.get(room);
+                if (checkRoom == undefined) {
+                    context.users.set(room, new Map().set(username, 1));
+                } else {
+                    if (checkRoom.get(username) === undefined || checkRoom.get(username) === 0) {
+                        context.users.get(room).set(username, 1);
+                    } else return res.status(500).send({ err: 'A user with this username was already connected ! Wait until the room is destroyed and try again !\n !!! A room is destroyed when every user logged off the room . ' });
+                }
+                const user = {
+                    username,
+                    room
+                }
+                let payload = {
+                    user
+                };
+                const token = jwt.sign(payload, config.get('jwtSecret'), {
+                    expiresIn: '2h',
+                });
+                return res.json({ token });
+            } else return res.status(500).send({ err: 'Invalid credentials .' });
+        } else return res.status(500).send({ err: 'Invalid credentials .' });
+    } else return res.status(500).send({ err: 'Invalid credentials .' });
+});
 app.get('/api', auth, async (req, res) => {
     try {
         res.json({ user: req.user })
