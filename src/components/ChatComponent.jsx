@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Typography, Paper, Container, Button, IconButton, Grid, Box } from '@mui/material';
+import { Typography, Paper, Container, IconButton, Grid, Box, Divider } from '@mui/material';
 import { useState, useEffect } from 'react';
 import ChatMessages from './ChatMessages';
 import ProgressBar from './ProgressBar'
@@ -7,6 +7,7 @@ import ChatUsers from './ChatUsers';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
 import UserMenu from './UserMenu';
+
 //Commited 
 const ChatComponent = ({ logout, user, socket }) => {
     //Modal
@@ -69,9 +70,9 @@ const ChatComponent = ({ logout, user, socket }) => {
                 <Paper elevation={5} sx={{ borderStyle: 'solid', borderColor: 'Grey' }}>
                     <ChatUsers open={open} setOpen={setOpen} users={users} />
                     <Box p={2}>
-                        <Grid container spacing={4}>
+                        <Grid container spacing={4} sx ={{paddingBottom:'10px'}}>
                             <Grid item xs={10}>
-                                <Typography variant='h6' gutterBottom>
+                                <Typography variant='h6'>
                                     {'Room : ' + user.room}
                                 </Typography>
                             </Grid>
@@ -79,6 +80,7 @@ const ChatComponent = ({ logout, user, socket }) => {
                                 <UserMenu onLogout={logout} onGetUsers={getUsers} />
                             </Grid>
                         </Grid>
+                        <Divider />
                         <Grid container justifyContent={'center'}>
                             <Grid item sx={{ height: '20rem' }} xs={12}>
                                 <ChatMessages messages={messages} />

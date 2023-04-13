@@ -39,7 +39,6 @@ io.on("connection", (socket) => {
         context.users.get(room).forEach((first, second) => {
             arr.push({ username: second, status: first == 1 ? 'on' : 'off' })
         });
-
         socket.emit("getting_users", arr);
     });
     socket.on("get_messages", room => {
@@ -56,7 +55,7 @@ app.post('/register', async (req, res) => {
             await db.query(`insert into t_user (username,password,ip)values($1,$2,$3);`, [username, password, ipAddress]);
         else return res.status(500).send({ err: 'There is already a user with this username .' });
     } else return res.status(500).send({ err: 'Something went wrong ! Check your credentials .' });
-    return res.json({ username });
+    return res.status(200);
 })
 
 app.post('/login', async (req, res) => {

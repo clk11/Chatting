@@ -1,34 +1,46 @@
 import React, { useState } from 'react';
-import { Button, TextField, Box, Typography, Container, Paper } from '@mui/material'
+import { Button, TextField, Box, Typography, Container, Paper, Link } from '@mui/material'
+import RoomDialog from '../components/RoomDialog';
 import axios from 'axios';
 import { Grid } from '@mui/material';
 const config = {
     'Content-Type': 'application/json',
 };
 const Login = () => {
+    const [isLogin, setLogin] = useState(true);
     const [username, setUsername] = useState('');
+    const [open, setOpen] = React.useState(false);
+    const [password, setPassword] = useState('');
+    const [rpassword, setPasswordR] = useState('');
     const [room, setRoom] = useState('');
-    const handleUsernameChange = (e) => {
-        setUsername(e.target.value);
-    };
-    const handleRoomChange = (e) => {
-        setRoom(e.target.value);
-    }
-    const onLoginClick = async () => {
-        if (username.length !== 0 && room.length !== 0) {
+    const onButtonClick = async () => {
+        if (isLogin) {
             let token;
             try {
-                token = (await axios.post(`http://localhost:3001/login`, { username, room }, config)).data.token;
+                token = (await axios.post(`http://localhost:3001/login`, { username, password, room }, config)).data.token;
                 localStorage.setItem('token', token);
+                console.log(token);
                 window.location.reload();
-            }catch(error){
-                console.log(error.response.data.err);
+            } catch (error) {
+                alert(error.response.data.err);
+            }
+        } else {
+            try {
+                await axios.post('http://localhost:3001/register', { username, password, rpassword }, config);
+                alert('Very well !');
+                changeClient();
+                setPasswordR('');
+            } catch (error) {
+                alert(error.response.data.err);
             }
         }
-        else alert('You need to complete everything !');
     };
+    const changeClient = () => {
+        setLogin(!isLogin);
+    }
     return (
         <Container component="main" maxWidth="xs">
+            <RoomDialog login={onButtonClick} setRoom={setRoom} open={open} setOpen={setOpen} />
             <Box
                 sx={{
                     marginTop: 8,
@@ -40,15 +52,15 @@ const Login = () => {
                 <Paper elevation={5}>
                     <Box padding={3} component="form" noValidate sx={{ mt: 1, textAlign: 'center' }}>
                         <Typography component="h1" variant="h5">
-                            Login
+                            {isLogin ? 'Login' : 'Register'}
                         </Typography>
                         <TextField
                             margin="normal"
                             required
-                            onChange={handleUsernameChange}
+                            onChange={(e) => { setUsername(e.target.value); }}
                             fullWidth
                             id="username"
-                            label="username"
+                            label="Username"
                             name="username"
                             value={username}
                             autoFocus
@@ -56,25 +68,40 @@ const Login = () => {
                         <TextField
                             margin="normal"
                             required
-                            onChange={handleRoomChange}
                             fullWidth
-                            id="room"
-                            label="room"
-                            name="room"
-                            value={room}
+                            onChange={(e) => { setPassword(e.target.value); }}
+                            id="password"
+                            label="Password"
+                            name="password"
+                            type='password'
                             autoFocus
                         />
+                        {!isLogin && (
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                onChange={(e) => { setPasswordR(e.target.value) }}
+                                id="rpassword"
+                                label="Retype your password"
+                                name="rpassword"
+                                type='password'
+                                autoFocus
+                            />
+                        )}
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Button
-                                    onClick={onLoginClick}
+                                    onClick={() => { if (isLogin) setOpen(true); else onButtonClick() }}
                                     fullWidth
                                     variant="contained"
                                 >
-                                    Log in
+                                    {isLogin ? 'Login' : 'Register'}
                                 </Button>
-                            </Grid>                            
+                            </Grid>
                         </Grid>
+                        <br />
+                        <Link onClick={changeClient}>{`Go to ${isLogin ? 'registration' : 'login'}`}</Link>
                     </Box>
                 </Paper>
             </Box>
