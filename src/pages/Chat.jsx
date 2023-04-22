@@ -3,7 +3,7 @@ import axios from 'axios'
 import ProgressBar from '../components/ProgressBar'
 import io from 'socket.io-client';
 import ChatComponent from '../components/ChatComponent';
-const socket = io("http://localhost:3001");
+const socket = io("/");
 const config = {
   'Content-Type': 'application/json',
 };

@@ -17,7 +17,7 @@ const Login = () => {
         if (isLogin) {
             let token;
             try {
-                token = (await axios.post(`http://localhost:3001/login`, { username, password, room }, config)).data.token;
+                token = (await axios.post(`/login`, { username, password, room }, config)).data.token;
                 localStorage.setItem('token', token);
                 console.log(token);
                 window.location.reload();
@@ -26,7 +26,7 @@ const Login = () => {
             }
         } else {
             try {
-                await axios.post('http://localhost:3001/register', { username, password, rpassword }, config);
+                await axios.post('/register', { username, password, rpassword }, config);
                 alert('Very well !');
                 changeClient();
                 setPasswordR('');

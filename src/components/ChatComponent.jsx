@@ -18,9 +18,7 @@ const ChatComponent = ({ logout, user, socket }) => {
     const [message, setMessage] = useState('');
     //
     useEffect(() => {
-        return async () => {
-            await getMessages();
-        }
+        getMessages();
     }, [])
     useEffect(() => {
         const handleReceivedMessage = obj => {
@@ -58,10 +56,12 @@ const ChatComponent = ({ logout, user, socket }) => {
         setMessage(e.target.value);
     }
     async function onSend() {
-        await socket.emit('send_message', { user, message });
-        setMessages(mess => [...mess, { message: message, username: user.username }]);
-        setMessage('');
-        document.getElementById('message').value = '';
+        if (message.length !== 0) {
+            await socket.emit('send_message', { user, message });
+            setMessages(mess => [...mess, { message: message, username: user.username }]);
+            setMessage('');
+            document.getElementById('message').value = '';
+        }
     }
     return (
         <Container style={{ paddingTop: '50px', width: '700px' }}>
@@ -70,7 +70,7 @@ const ChatComponent = ({ logout, user, socket }) => {
                 <Paper elevation={5} sx={{ borderStyle: 'solid', borderColor: 'Grey' }}>
                     <ChatUsers open={open} setOpen={setOpen} users={users} />
                     <Box p={2}>
-                        <Grid container spacing={4} sx ={{paddingBottom:'10px'}}>
+                        <Grid container spacing={4} sx={{ paddingBottom: '10px' }}>
                             <Grid item xs={10}>
                                 <Typography variant='h6'>
                                     {'Room : ' + user.room}

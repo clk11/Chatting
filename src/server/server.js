@@ -9,13 +9,17 @@ const auth = require('./middlewares/auth');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const { context } = require('./utils/serverContext');
+const helmet = require('helmet');
 
 app.use(express.json({ extended: false }));
 app.use(cors());
+app.use(helmet());
+
+const production = false;
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: !production ? "http://localhost:3000" : "http://brainstormish.live",
         methods: ["GET", "POST"],
         credentials: true,
         allowHeaders: ["Content-Type", "Authorization"],
@@ -55,7 +59,7 @@ app.post('/register', async (req, res) => {
             await db.query(`insert into t_user (username,password,ip)values($1,$2,$3);`, [username, password, ipAddress]);
         else return res.status(500).send({ err: 'There is already a user with this username .' });
     } else return res.status(500).send({ err: 'Something went wrong ! Check your credentials .' });
-    return res.status(200);
+    return res.json({ status: 'good' });
 })
 
 app.post('/login', async (req, res) => {
